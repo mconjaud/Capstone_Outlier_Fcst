@@ -8,21 +8,21 @@
 
 # Motivação
 library(readr)
-us <- read_csv("https://raw.githubusercontent.com/mconjaud/Capstone/refs/heads/main/preco_anbima_di_spread.csv?token=GHSAT0AAAAAAC3H2RWQJHTHPEQJJHLEZD74Z2MXBIA")
-plot(us$date,us$cases,type='l',ylab='cases',xlab='date')
+preco_anbima <- read_csv("https://raw.githubusercontent.com/mconjaud/Capstone/refs/heads/main/preco_anbima_ajustado.csv?token=GHSAT0AAAAAAC3H2RWRS35KEDKTWLOQJ332Z2QTPDA")
+plot(preco_anbima$dataReferencia,preco_anbima$taxaIndicativa,type='l',ylab='Taxa Indicativa',xlab='Data')
 
 # correlação entre lag 1 e nível
 library(dplyr)
-us <- us %>% mutate(us_lag=lag(cases,2))
-cor(us$cases,us$us_lag,use='na.or.complete')
+preco_anbima <- preco_anbima %>% mutate(preco_anbima_lag=lag(taxaIndicativa,1))
+cor(preco_anbima$taxaIndicativa,preco_anbima$preco_anbima_lag,use='na.or.complete')
 
 # matriz de correlação
 library(reshape2)
 library(ggplot2)
-matrix <- matrix(NA,length(us$cases),61)
-matrix[,1] <- us$cases
+matrix <- matrix(NA,length(preco_anbima$taxaIndicativa),61)
+matrix[,1] <- preco_anbima$taxaIndicativa
 for (i in 2:61){
-  matrix[,i] <- lag(us$cases,i)
+  matrix[,i] <- lag(preco_anbima$taxaIndicativa,i)
 }
 cormat <- cor(matrix,use='na.or.complete')
 melted_cormat <- melt(cormat)
@@ -58,10 +58,10 @@ for (i in 2:n){
 ########## COMPONENTES DE UMA SÉRIE ###################
 
 # Decomposição de séries de tempo usando R basis
-data(AirPassengers)
-AP <- AirPassengers
-decomposeAP <- decompose(AP,"multiplicative")
-plot(decomposeAP)
+data(preco_anbima)
+PA <- preco_anbima
+decomposePA <- decompose(PA,"multiplicative")
+plot(decomposePA)
 
 # Outros pacotes: forecast
 library(forecast)
@@ -87,17 +87,10 @@ prophet_plot_components(m,forecast)
 # Teste ADF
 library(tseries)
 library(readr)
-GDP_EUA <- read_csv("Documents/Insper/PADS/FA_2022_aula1/GDP_EUA.csv") #trocar caminho
-gdp = GDP_EUA$NA000334Q 
-adf.test(gdp, k = trunc((length(gdp)-1)^(1/3))) 
+preco <- read_csv("C:/Users/miche/Desktop/CAPSTONE/Capstone/preco_anbima_ALGA28.csv") 
+i = preco$taxaIndicativa 
+adf.test(i, k = trunc((length(gdp)-1)^(1/3))) 
 # MAIS INFO: ver https://robjhyndman.com/eindhoven/2-3-Differencing.pdf
-
-# teste KPSS: pacote fable
-library(fpp3)
-library(fable)
-us_employment %>%
-  filter(Title=='Total Private') %>%
-  features(Employed, unitroot_kpss)
 
 ########## MODELAGEM ARIMA e BOX-JENKINS ###################
 
